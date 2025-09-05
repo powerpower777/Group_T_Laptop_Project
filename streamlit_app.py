@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
 
 # Defining the dataset to a variable
-df = pd.read_csv("laptop_price.csv")
+df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
 # The creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
