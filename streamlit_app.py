@@ -11,7 +11,7 @@ import streamlit as st
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
 # The creation And Training Models
-x = df.drop(columns =["Inches", "Weight"], axis=1 ) 
+x = df.drop(columns =["Prices","Inches", "Weight"], axis=1 ) 
 y = df["Price"] # The target variable
 
 x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
