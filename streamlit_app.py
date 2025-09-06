@@ -14,7 +14,7 @@ df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
@@ -37,25 +37,26 @@ model = Pipeline(steps=[
 # Train
 model.fit(x_train, y_train)
 
-# Function to predict laptop price
+# Corrected Function to predict laptop price
 def get_price(user_input):
+   """
+   Predicts the price of a laptop based on user input using the trained pipeline.
 
-   new_data = {new_cols :[user_input[a]] for new_cols, a in zip(x.columns, range(len(x.columns)))}
+   Args:
+       user_input (list): A list of user-selected features.
+
+   Returns:
+       float: The predicted price of the laptop.
+   """
+   # Create a DataFrame from the user input. The column names must match the original `x`.
+   user_data = pd.DataFrame([user_input], columns=x.columns)
    
-   new_df = pd.DataFrame(new_data)
-  
-   # New data to numeric value
-
-   onehot_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-
-   for cols in new_df.select_dtypes(include ="object").columns:
-      
-      encoded_features = onehot_encoder.fit_transform(new_df[[cols]])
-      encoded_df = pd.DataFrame(encoded_features, columns=onehot_encoder.get_feature_names_out([cols]))
-      # Join with the original DataFrame
-      df_encoded = pd.concat([new_df, encoded_df], axis=1)
-
-   return model.predict(df_encoded)
+   # Use the pre-trained pipeline to predict the price.
+   # The pipeline handles all preprocessing (encoding and scaling) automatically.
+   predicted_price = model.predict(user_data)
+   
+   # Return the first (and only) element of the prediction array.
+   return predicted_price[0]
 
 
 st.title("Group T Laptop Price Project")
@@ -77,5 +78,5 @@ user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gp
 
 # shows the price of the device
 if st.button("Click"):
-    text = f"The price is £{get_price(user_input)[0]:,.2f}"
+    text = f"The price is £{get_price(user_input):,.2f}"
     st.write(text)
