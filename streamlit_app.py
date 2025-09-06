@@ -50,10 +50,9 @@ def get_price(user_input, fallback_price):
    Returns:
        float: The predicted price or the fallback price.
    """
-   user_data = pd.DataFrame([user_input], columns=x.columns)
-   
    try:
-       # Attempt to predict the price.
+       # Attempt to create the DataFrame and then predict the price.
+       user_data = pd.DataFrame([user_input], columns=x.columns)
        predicted_price = model.predict(user_data)
        return predicted_price[0]
    except ValueError:
