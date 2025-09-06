@@ -5,9 +5,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split as split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import numpy as np
+import streamlit as st
 
 # Hardcoding a sample of the dataset to make the script self-contained.
-# This replaces the need for a local "cleaned_laptop_price_dataset.csv" file.
 data = {
     'Company': ['Apple', 'Dell', 'HP', 'Lenovo', 'Apple', 'Dell'],
     'Product': ['Macbook Pro', 'XPS 13', 'Spectre x360', 'Yoga C930', 'Macbook Air', 'Inspiron'],
@@ -26,17 +26,15 @@ data = {
 df = pd.DataFrame(data)
 
 # --- Model Creation and Training ---
+# The rest of the model training pipeline is correct and self-contained
 x = df.drop(columns=["Price", "Inches", "Weight"], axis=1) 
 y = df["Price"] # target variable
 
-# Splitting data for training and testing
 x_train, x_test, y_train, y_test = split(x, y, test_size=0.35, random_state=0)
 
-# Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
 numerical_columns = x.select_dtypes(exclude=['object']).columns
 
-# Create the ColumnTransformer for preprocessing
 preprocessor = ColumnTransformer(
     transformers=[
         ('category', OneHotEncoder(handle_unknown='ignore'), categorical_columns),
@@ -44,71 +42,46 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-# Create the final pipeline
 model = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', LinearRegression())
 ])
 
-# Train the model with the training data
 model.fit(x_train, y_train)
 
-# --- Function to predict laptop price ---
 def get_price(user_input_list):
     """
     Predicts the price of a laptop based on user input using the trained pipeline.
-
-    Args:
-        user_input_list (list): A list of user-selected features in the correct order.
-
-    Returns:
-        float: The predicted price of the laptop.
     """
-    # Create a DataFrame from the user input.
-    # The columns must match the order of the training data.
     user_data = pd.DataFrame([user_input_list], columns=x.columns)
-    
-    # Use the pre-trained pipeline to predict the price.
-    # The pipeline handles all preprocessing (encoding and scaling) automatically.
     predicted_price = model.predict(user_data)
-    
-    # Return the first (and only) element of the prediction array.
     return predicted_price[0]
 
-# --- Command-line Interface (CLI) for User Input ---
-def main():
-    """
-    A simple command-line interface to get user input and predict the price.
-    """
-    print("Welcome to the Laptop Price Predictor!")
-    print("Please choose the laptop features to get the price.")
-    
-    # Get user input for each feature.
-    # The list of unique values is displayed for the user.
-    Company = input(f"Enter Company ({sorted(list(set(x['Company'])))}) : ")
-    Product = input(f"Enter Product ({sorted(list(set(x['Product'])))}) : ")
-    TypeName = input(f"Enter Type ({sorted(list(set(x['TypeName'])))}) : ")
-    ScreenResolution = input(f"Enter Screen Resolution ({sorted(list(set(x['ScreenResolution'])))}) : ")
-    Cpu = input(f"Enter CPU ({sorted(list(set(x['Cpu'])))}) : ")
-    Ram = input(f"Enter RAM ({sorted(list(set(x['Ram'])))}) : ")
-    Memory = input(f"Enter Memory ({sorted(list(set(x['Memory'])))}) : ")
-    Gpu = input(f"Enter GPU ({sorted(list(set(x['Gpu'])))}) : ")
-    Operating_System = input(f"Enter Operating System ({sorted(list(set(x['Operating_System'])))}) : ")
 
+# --- Streamlit Web App Interface ---
 st.title("Group T Laptop Price Project")
 st.write("Choose the laptop features to know the price")
 
-    # Create the user input list in the correct order
-    user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
+# Creation of selection box to get user input
+Company = st.selectbox("Company", sorted(list(set(x["Company"].tolist()))))
+Product = st.selectbox("Product", sorted(list(set(x["Product"].tolist()))))
+TypeName = st.selectbox("Type", sorted(list(set(x["TypeName"].tolist()))))
+ScreenResolution = st.selectbox("Screen Resolution", sorted(list(set(x["ScreenResolution"].tolist()))))
+Cpu = st.selectbox("CPU", sorted(list(set(x["Cpu"].tolist()))))
+Ram = st.selectbox("RAM", sorted(list(set(x["Ram"].tolist()))))
+Memory = st.selectbox("Memory", sorted(list(set(x["Memory"].tolist()))))
+Gpu = st.selectbox("GPU", sorted(list(set(x["Gpu"].tolist()))))
+Operating_System = st.selectbox("Operating_System", sorted(list(set(x["Operating_System"].tolist()))))
 
-    # Predict the price and format the output
+# Create the user input list from the Streamlit selections
+user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
+
+# shows the price of the device when the button is clicked
+if st.button("Click"):
     try:
         predicted_price = get_price(user_input)
-        print(f"\nThe predicted price for this laptop is: £{predicted_price:,.2f}")
+        text = f"The price is £{predicted_price:,.2f}"
+        st.write(text)
     except Exception as e:
-        print(f"\nAn error occurred during prediction: {e}")
-        print("Please ensure your input values exactly match the examples provided.")
-
-# Run the main function
-if __name__ == "__main__":
-    main()
+        st.error(f"An error occurred during prediction: {e}")
+        st.write("Please ensure your input values exactly match the examples provided.")
