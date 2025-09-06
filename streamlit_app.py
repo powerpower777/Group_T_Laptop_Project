@@ -74,10 +74,10 @@ Memory = st.selectbox( "Memory" ,sorted(list(set(x["Memory"].tolist()))))
 Gpu = st.selectbox( "GPU" ,sorted(list(set(x["Gpu"].tolist()))))
 Operating_System = st.selectbox( "Operating_System" ,sorted(list(set(x["Operating_System"].tolist()))))
 
-user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
 
 # shows the price of the device
 if st.button("Click"):
+    user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
     try:
         text = f"The price is £{get_price(user_input):,.2f}"
         st.write(text)
