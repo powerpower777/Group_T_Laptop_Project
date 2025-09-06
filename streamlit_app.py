@@ -78,5 +78,8 @@ user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gp
 
 # shows the price of the device
 if st.button("Click"):
-    text = f"The price is £{get_price(user_input):,.2f}"
-    st.write(text)
+    try:
+        text = f"The price is £{get_price(user_input):,.2f}"
+        st.write(text)
+    except ValueError as e:
+        st.error(f"An error occurred: The selected features may not be compatible with the model. Please try different combinations.")
