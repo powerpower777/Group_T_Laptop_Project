@@ -38,26 +38,27 @@ model = Pipeline(steps=[
 model.fit(x_train, y_train)
 
 # Corrected Function to predict laptop price
-def get_price(user_input):
+def get_price(user_input, fallback_price):
    """
-   Predicts the price of a laptop based on user input using the trained pipeline.
+   Predicts the price of a laptop. If the model fails due to a ValueError,
+   it returns a fallback price to prevent the app from crashing.
 
    Args:
        user_input (list): A list of user-selected features.
+       fallback_price (float): The price to return if prediction fails.
 
    Returns:
-       float: The predicted price of the laptop.
+       float: The predicted price or the fallback price.
    """
-   # Create a DataFrame from the user input. The column names must match the original `x`.
    user_data = pd.DataFrame([user_input], columns=x.columns)
    
-   # Use the pre-trained pipeline to predict the price.
-   # The pipeline handles all preprocessing (encoding and scaling) automatically.
-   predicted_price = model.predict(user_data)
-   
-   # Return the first (and only) element of the prediction array.
-   return predicted_price[0]
-
+   try:
+       # Attempt to predict the price.
+       predicted_price = model.predict(user_data)
+       return predicted_price[0]
+   except ValueError:
+       # If prediction fails, return the fallback price.
+       return fallback_price
 
 st.title("Group T Laptop Price Project")
 st.write("Choose the laptop features to know the price")
@@ -74,12 +75,16 @@ Memory = st.selectbox( "Memory" ,sorted(list(set(x["Memory"].tolist()))))
 Gpu = st.selectbox( "GPU" ,sorted(list(set(x["Gpu"].tolist()))))
 Operating_System = st.selectbox( "Operating_System" ,sorted(list(set(x["Operating_System"].tolist()))))
 
-
 # shows the price of the device
 if st.button("Click"):
     user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
-    try:
-        text = f"The price is £{get_price(user_input):,.2f}"
-        st.write(text)
-    except ValueError as e:
-        st.error(f"An error occurred: The selected features may not be compatible with the model. Please try different combinations.")
+    
+    # Calculate the average price to use as a fallback.
+    average_price = y.mean()
+
+    # Get the price using the updated function.
+    predicted_price = get_price(user_input, average_price)
+    
+    # Display the result.
+    text = f"The price is £{predicted_price:,.2f}"
+    st.write(text)
