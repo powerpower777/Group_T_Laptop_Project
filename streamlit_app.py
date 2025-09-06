@@ -7,16 +7,16 @@ from sklearn.model_selection import train_test_split as split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
 
-# Defining the dataset to a variable
+# Defining dataset to a variable
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
-# The creation And Training Models
-x = df.drop(columns =["Prices","Inches", "Weight"], axis=1 ) 
-y = df["Price"] # The target variable
+# Creation And Training Models
+x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
+y = df["Price"] # target variable
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
 
-# Identifying categorical & numeric columns
+# Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
 numerical_columns = x.select_dtypes(exclude=['object']).columns
 
@@ -34,17 +34,17 @@ model = Pipeline(steps=[
     ('regressor', LinearRegression())
 ])
 
-# The Train
+# Train
 model.fit(x_train, y_train)
 
-# The function to predict laptop price
+# Function to predict laptop price
 def get_price(user_input):
 
    new_data = {new_cols :[user_input[a]] for new_cols, a in zip(x.columns, range(len(x.columns)))}
    
    new_df = pd.DataFrame(new_data)
   
-   # The new data to numeric value
+   # New data to numeric value
 
    onehot_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
 
@@ -52,16 +52,16 @@ def get_price(user_input):
       
       encoded_features = onehot_encoder.fit_transform(new_df[[cols]])
       encoded_df = pd.DataFrame(encoded_features, columns=onehot_encoder.get_feature_names_out([cols]))
-      # Joining with the original DataFrame
+      # Join with the original DataFrame
       df_encoded = pd.concat([new_df, encoded_df], axis=1)
 
    return model.predict(df_encoded)
 
 
-st.title("Group T Lapto Price Project")
+st.title("Group T Project")
 st.write("Choose the laptop features to know the price")
 
-# The creation of selection box to get user input
+# Creation of selection box to get user input
 
 Company = st.selectbox( "Company" ,sorted(list(set(x["Company"].tolist()))))
 Product = st.selectbox( "Product" ,sorted(list(set(x["Product"].tolist()))))
@@ -75,7 +75,7 @@ Operating_System = st.selectbox( "Operating_System" ,sorted(list(set(x["Operatin
 
 user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
 
-# to show the price of the device
+# shows the price of the device
 if st.button("Click"):
     text = f"The price is £{get_price(user_input)[0]:,.2f}"
     st.write(text)
