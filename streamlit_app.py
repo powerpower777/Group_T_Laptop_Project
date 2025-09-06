@@ -1,14 +1,3 @@
-# Group T Members(Contributors)
-# Nta Bright Maurice 23/EG/CO/122
-# Atting Edna Eddy 23/EG/CO/088
-# Emediong Isaiah Udo 22/EG/CO/1770
-# Akpan Christopher Christopher 23/EG/CO/114
-# Okoh Emmanuel Okon 22/EG/CO/1787
-# God'sfavour Victor Ekanem 23/EG/CO/107
-# Edem Joseph Sunday 22/EG/CO/1823
-# Aharanwa Victor Kemakolim 22/EG/CO/1750
-# Ibeh Charles Chinedu 22/EG/CO/1641
-# Okon Imoh Patrick 23/EG/CO/060
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
