@@ -7,29 +7,14 @@ from sklearn.model_selection import train_test_split as split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
 
-# Expanded dataset to handle more user combinations.
-data = {
-    'Company': ['Apple', 'Dell', 'HP', 'Lenovo', 'Apple', 'Dell', 'HP', 'Acer', 'Asus', 'Microsoft', 'Dell', 'HP', 'Lenovo', 'Apple', 'Dell', 'HP', 'Lenovo', 'Acer', 'Asus', 'Microsoft'],
-    'Product': ['Macbook Pro', 'XPS 13', 'Spectre x360', 'Yoga C930', 'Macbook Air', 'Inspiron', 'Envy 13', 'Swift 3', 'Zenbook', 'Surface Pro', 'Latitude', 'Pavilion', 'ThinkPad', 'iMac', 'Alienware', 'Omen', 'IdeaPad', 'Aspire', 'ROG', 'Surface Book'],
-    'TypeName': ['Ultrabook', 'Ultrabook', '2 in 1 Convertible', '2 in 1 Convertible', 'Ultrabook', 'Notebook', 'Notebook', 'Ultrabook', 'Ultrabook', '2 in 1 Convertible', 'Notebook', 'Notebook', 'Notebook', 'Ultrabook', 'Gaming', 'Gaming', 'Notebook', 'Notebook', 'Gaming', 'Ultrabook'],
-    'Inches': [13.3, 13.3, 13.3, 13.9, 13.3, 15.6, 13.3, 14.0, 14.0, 12.3, 14.0, 15.6, 14.0, 21.5, 17.3, 15.6, 14.0, 15.6, 15.6, 13.5],
-    'ScreenResolution': ['Retina Display', '4K Ultra HD', 'Full HD', '4K Ultra HD', 'Retina Display', 'Full HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', '4K Ultra HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', 'Full HD', '3K Display'],
-    'Cpu': ['Intel Core i7', 'Intel Core i7', 'Intel Core i7', 'Intel Core i7', 'Intel Core i5', 'Intel Core i5', 'Intel Core i5', 'Intel Core i7', 'Intel Core i7', 'Intel Core i5', 'Intel Core i7', 'AMD Ryzen', 'Intel Core i7', 'Intel Core i5', 'Intel Core i7', 'Intel Core i7', 'Intel Core i5', 'AMD Ryzen', 'Intel Core i7', 'Intel Core i7'],
-    'Ram': ['16GB', '8GB', '16GB', '16GB', '8GB', '8GB', '8GB', '16GB', '16GB', '8GB', '16GB', '12GB', '16GB', '8GB', '32GB', '16GB', '8GB', '8GB', '16GB', '16GB'],
-    'Memory': ['256GB SSD', '512GB SSD', '1TB SSD', '1TB SSD', '128GB SSD', '1TB HDD', '512GB SSD', '256GB SSD', '512GB SSD', '256GB SSD', '512GB SSD', '256GB SSD', '1TB SSD', '256GB SSD', '1TB SSD + 1TB HDD', '512GB SSD', '1TB HDD', '256GB SSD', '1TB SSD', '512GB SSD'],
-    'Gpu': ['Intel Iris Plus Graphics', 'Intel Iris Plus Graphics', 'Nvidia GeForce MX150', 'Intel UHD Graphics 620', 'Intel Iris Plus Graphics', 'AMD Radeon 520', 'Nvidia GeForce MX150', 'Intel UHD Graphics 620', 'Nvidia GeForce MX150', 'Intel UHD Graphics 620', 'Nvidia GeForce MX150', 'AMD Radeon', 'Intel UHD Graphics 620', 'Intel Iris Plus Graphics', 'Nvidia GeForce GTX 1070', 'Nvidia GeForce GTX 1060', 'AMD Radeon', 'AMD Radeon', 'Nvidia GeForce GTX 1070', 'Intel UHD Graphics 620'],
-    'Operating_System': ['macOS', 'Windows 10', 'Windows 10', 'Windows 10', 'macOS', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'macOS', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10', 'Windows 10'],
-    'Weight': [1.37, 1.29, 1.32, 1.35, 1.25, 2.3, 1.31, 1.45, 1.2, 0.77, 1.6, 2.1, 1.5, 5.66, 3.8, 2.6, 2.2, 2.1, 2.4, 1.5],
-    'Price': [1339.69, 1495.59, 1749.69, 1999.99, 1158.69, 449.69, 1200.00, 1150.00, 1300.00, 1100.00, 1550.00, 850.00, 1650.00, 1899.99, 2500.00, 2100.00, 750.00, 600.00, 2300.00, 1950.00]
-}
-
-df = pd.DataFrame(data)
+# Defining dataset to a variable by reading the uploaded CSV file.
+df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
 # Creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
