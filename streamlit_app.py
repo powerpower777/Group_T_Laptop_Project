@@ -58,7 +58,7 @@ def get_price(user_input):
    return model.predict(df_encoded)
 
 
-st.title("Group T Project")
+st.title("Group T Laptp Price Model Project")
 st.write("Choose the laptop features to know the price")
 
 # Creation of selection box to get user input
