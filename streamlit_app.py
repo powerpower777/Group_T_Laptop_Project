@@ -14,7 +14,7 @@ df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
