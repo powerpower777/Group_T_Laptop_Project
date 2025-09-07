@@ -88,7 +88,12 @@ Operating_System = st.selectbox("Operating System", get_unique_sorted("Operating
 
 # shows the price of the device
 if st.button("Predict Price"):
+    # Create the user input with all required columns in the correct order
     user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
+    
+    # Debug: Show what columns we're expecting vs what we're providing
+    st.write(f"Expected columns: {list(x.columns)}")
+    st.write(f"Provided values: {user_input}")
     
     # Get the price using the updated function
     predicted_price = get_price(user_input)
