@@ -6,41 +6,19 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split as split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
-import re
 
-# Defining dataset to a variable
+# Defining dataset to a variable by reading the uploaded CSV file.
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
-
-# Let's check what's actually in the Ram column
-print("Unique values in Ram column:", df['Ram'].unique())
-
-# Clean the Ram column - extract only the numeric part before any space or text
-def clean_ram(value):
-    if isinstance(value, str):
-        # Extract the numeric part at the beginning of the string
-        match = re.match(r'^(\d+)', value)
-        if match:
-            return int(match.group(1))
-    return value
-
-# Apply cleaning to the Ram column
-df['Ram'] = df['Ram'].apply(clean_ram)
 
 # Creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
-# Let's check the column names to ensure they match
-print("Columns in x:", x.columns.tolist())
-
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
 numerical_columns = x.select_dtypes(exclude=['object']).columns
-
-print("Categorical columns:", categorical_columns.tolist())
-print("Numerical columns:", numerical_columns.tolist())
 
 # Transformer: Encode categorical + scale numeric
 preprocessor = ColumnTransformer(
@@ -61,51 +39,69 @@ model.fit(x_train, y_train)
 
 # Function to predict laptop price
 def get_price(user_input):
-    # Clean the Ram value in user input
-    cleaned_input = user_input.copy()
-    ram_value = cleaned_input[5]  # Ram is the 6th element (index 5)
-    if isinstance(ram_value, str):
-        match = re.match(r'^(\d+)', ram_value)
-        if match:
-            cleaned_input[5] = int(match.group(1))
+    """
+    Predicts the price of a laptop based on user input.
     
-    # Create a dictionary with the correct column names and user input
-    new_data = {col: [value] for col, value in zip(x.columns, cleaned_input)}
-    
-    # Create DataFrame with the same structure as training data
-    new_df = pd.DataFrame(new_data)
-    
-    # Use the model to predict
-    return model.predict(new_df)
+    Args:
+        user_input (list): A list of user-selected features.
+        
+    Returns:
+        float: The predicted price.
+    """
+    try:
+        # Create DataFrame with the same structure as training data
+        user_data = pd.DataFrame([user_input], columns=x.columns)
+        
+        # Predict the price
+        predicted_price = model.predict(user_data)
+        return predicted_price[0]
+    except Exception as e:
+        st.error(f"Prediction error: {str(e)}")
+        # Return a more appropriate fallback based on similar configurations
+        similar_configs = df[
+            (df['Company'] == user_input[0]) & 
+            (df['TypeName'] == user_input[2])
+        ]
+        
+        if len(similar_configs) > 0:
+            return similar_configs['Price'].mean()
+        else:
+            return y.mean()
 
 st.title("Group T Laptop Price Project")
 st.write("Choose the laptop features to know the price")
 
+# Get unique values for each category, ensuring they exist in the dataset
+def get_unique_sorted(column_name):
+    return sorted([str(val) for val in x[column_name].unique() if pd.notna(val)])
+
 # Creation of selection box to get user input
-Company = st.selectbox("Company", sorted(list(set(x["Company"].tolist()))))
-Product = st.selectbox("Product", sorted(list(set(x["Product"].tolist()))))
-TypeName = st.selectbox("Type", sorted(list(set(x["TypeName"].tolist()))))
-ScreenResolution = st.selectbox("Screen Resolution", sorted(list(set(x["ScreenResolution"].tolist()))))
-Cpu = st.selectbox("CPU", sorted(list(set(x["Cpu"].tolist()))))
-
-# For Ram, we need to extract just the numeric values for display
-ram_options = sorted(list(set(x["Ram"].astype(str).tolist())))
-Ram = st.selectbox("RAM", ram_options)
-
-Memory = st.selectbox("Memory", sorted(list(set(x["Memory"].tolist()))))
-Gpu = st.selectbox("GPU", sorted(list(set(x["Gpu"].tolist()))))
-Operating_System = st.selectbox("Operating_System", sorted(list(set(x["Operating_System"].tolist()))))
-
-user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
+Company = st.selectbox("Company", get_unique_sorted("Company"))
+Product = st.selectbox("Product", get_unique_sorted("Product"))
+TypeName = st.selectbox("Type", get_unique_sorted("TypeName"))
+ScreenResolution = st.selectbox("Screen Resolution", get_unique_sorted("ScreenResolution"))
+Cpu = st.selectbox("CPU", get_unique_sorted("Cpu"))
+Ram = st.selectbox("RAM", get_unique_sorted("Ram"))
+Memory = st.selectbox("Memory", get_unique_sorted("Memory"))
+Gpu = st.selectbox("GPU", get_unique_sorted("Gpu"))
+Operating_System = st.selectbox("Operating System", get_unique_sorted("Operating_System"))
 
 # shows the price of the device
-if st.button("Click"):
-    try:
-        price = get_price(user_input)[0]
-        text = f"The price is £{price:,.2f}"
-        st.write(text)
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-        # Debug information
-        st.write("Columns in training data:", x.columns.tolist())
-        st.write("User input fields:", [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System])
+if st.button("Predict Price"):
+    user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
+    
+    # Get the price using the updated function
+    predicted_price = get_price(user_input)
+    
+    # Display the result
+    st.success(f"The estimated price is £{predicted_price:,.2f}")
+    
+    # Show some context - similar laptops in the dataset
+    similar_laptops = df[
+        (df['Company'] == Company) & 
+        (df['TypeName'] == TypeName)
+    ].head(3)
+    
+    if len(similar_laptops) > 0:
+        st.write("Similar laptops in our dataset:")
+        st.dataframe(similar_laptops[['Company', 'Product', 'TypeName', 'Price']])
