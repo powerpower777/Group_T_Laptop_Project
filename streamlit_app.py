@@ -6,9 +6,25 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split as split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
+import re
 
 # Defining dataset to a variable
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
+
+# Let's check what's actually in the Ram column
+print("Unique values in Ram column:", df['Ram'].unique())
+
+# Clean the Ram column - extract only the numeric part before any space or text
+def clean_ram(value):
+    if isinstance(value, str):
+        # Extract the numeric part at the beginning of the string
+        match = re.match(r'^(\d+)', value)
+        if match:
+            return int(match.group(1))
+    return value
+
+# Apply cleaning to the Ram column
+df['Ram'] = df['Ram'].apply(clean_ram)
 
 # Creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
@@ -39,15 +55,19 @@ model.fit(x_train, y_train)
 
 # Function to predict laptop price
 def get_price(user_input):
+    # Clean the Ram value in user input
+    cleaned_input = user_input.copy()
+    ram_value = cleaned_input[5]  # Ram is the 6th element (index 5)
+    if isinstance(ram_value, str):
+        match = re.match(r'^(\d+)', ram_value)
+        if match:
+            cleaned_input[5] = int(match.group(1))
+    
     # Create a dictionary with the correct column names and user input
-    new_data = {col: [value] for col, value in zip(x.columns, user_input)}
+    new_data = {col: [value] for col, value in zip(x.columns, cleaned_input)}
     
     # Create DataFrame with the same structure as training data
     new_df = pd.DataFrame(new_data)
-    
-    # Convert Ram to numeric if it's a string
-    if 'Ram' in new_df.columns and new_df['Ram'].dtype == 'object':
-        new_df['Ram'] = new_df['Ram'].str.replace('GB', '').astype(int)
     
     # Use the model to predict
     return model.predict(new_df)
@@ -61,7 +81,11 @@ Product = st.selectbox("Product", sorted(list(set(x["Product"].tolist()))))
 TypeName = st.selectbox("Type", sorted(list(set(x["TypeName"].tolist()))))
 ScreenResolution = st.selectbox("Screen Resolution", sorted(list(set(x["ScreenResolution"].tolist()))))
 Cpu = st.selectbox("CPU", sorted(list(set(x["Cpu"].tolist()))))
-Ram = st.selectbox("RAM", sorted(list(set(x["Ram"].astype(str).tolist()))))
+
+# For Ram, we need to extract just the numeric values for display
+ram_options = sorted(list(set(x["Ram"].astype(str).tolist())))
+Ram = st.selectbox("RAM", ram_options)
+
 Memory = st.selectbox("Memory", sorted(list(set(x["Memory"].tolist()))))
 Gpu = st.selectbox("GPU", sorted(list(set(x["Gpu"].tolist()))))
 Operating_System = st.selectbox("Operating_System", sorted(list(set(x["Operating_System"].tolist()))))
