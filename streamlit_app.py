@@ -30,11 +30,17 @@ df['Ram'] = df['Ram'].apply(clean_ram)
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
+# Let's check the column names to ensure they match
+print("Columns in x:", x.columns.tolist())
+
 x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
 numerical_columns = x.select_dtypes(exclude=['object']).columns
+
+print("Categorical columns:", categorical_columns.tolist())
+print("Numerical columns:", numerical_columns.tolist())
 
 # Transformer: Encode categorical + scale numeric
 preprocessor = ColumnTransformer(
@@ -100,3 +106,6 @@ if st.button("Click"):
         st.write(text)
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
+        # Debug information
+        st.write("Columns in training data:", x.columns.tolist())
+        st.write("User input fields:", [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System])
