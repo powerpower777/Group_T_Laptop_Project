@@ -45,7 +45,11 @@ def get_price(user_input):
     # Create DataFrame with the same structure as training data
     new_df = pd.DataFrame(new_data)
     
-    # Use the model to predict (it will handle preprocessing automatically)
+    # Convert Ram to numeric if it's a string
+    if 'Ram' in new_df.columns and new_df['Ram'].dtype == 'object':
+        new_df['Ram'] = new_df['Ram'].str.replace('GB', '').astype(int)
+    
+    # Use the model to predict
     return model.predict(new_df)
 
 st.title("Group T Laptop Price Project")
@@ -57,7 +61,7 @@ Product = st.selectbox("Product", sorted(list(set(x["Product"].tolist()))))
 TypeName = st.selectbox("Type", sorted(list(set(x["TypeName"].tolist()))))
 ScreenResolution = st.selectbox("Screen Resolution", sorted(list(set(x["ScreenResolution"].tolist()))))
 Cpu = st.selectbox("CPU", sorted(list(set(x["Cpu"].tolist()))))
-Ram = st.selectbox("RAM", sorted(list(set(x["Ram"].tolist()))))
+Ram = st.selectbox("RAM", sorted(list(set(x["Ram"].astype(str).tolist()))))
 Memory = st.selectbox("Memory", sorted(list(set(x["Memory"].tolist()))))
 Gpu = st.selectbox("GPU", sorted(list(set(x["Gpu"].tolist()))))
 Operating_System = st.selectbox("Operating_System", sorted(list(set(x["Operating_System"].tolist()))))
@@ -66,6 +70,9 @@ user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gp
 
 # shows the price of the device
 if st.button("Click"):
-    price = get_price(user_input)[0]
-    text = f"The price is £{price:,.2f}"
-    st.write(text)
+    try:
+        price = get_price(user_input)[0]
+        text = f"The price is £{price:,.2f}"
+        st.write(text)
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
