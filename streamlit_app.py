@@ -10,6 +10,9 @@ import streamlit as st
 # Defining dataset to a variable by reading the uploaded CSV file.
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
+# A key fix to ensure column names are correctly read
+df.columns = df.columns.str.strip()
+
 # Creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
@@ -87,3 +90,4 @@ if st.button("Click"):
     # Display the result.
     text = f"The price is £{predicted_price:,.2f}"
     st.write(text)
+
