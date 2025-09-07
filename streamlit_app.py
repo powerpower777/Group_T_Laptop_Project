@@ -10,11 +10,15 @@ import streamlit as st
 # Defining dataset to a variable
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
+# FIX: Drop any unnamed columns and strip whitespace from column names
+df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+df.columns = df.columns.str.strip()
+
 # Creation And Training Models
 x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
 y = df["Price"] # target variable
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.35, random_state=0)
+x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
@@ -58,7 +62,7 @@ def get_price(user_input):
    return model.predict(df_encoded)
 
 
-st.title("Group Q Project")
+st.title("Group T Laptop Price Project")
 st.write("Choose the laptop features to know the price")
 
 # Creation of selection box to get user input
@@ -79,3 +83,4 @@ user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gp
 if st.button("Click"):
     text = f"The price is £{get_price(user_input)[0]:,.2f}"
     st.write(text)
+    
