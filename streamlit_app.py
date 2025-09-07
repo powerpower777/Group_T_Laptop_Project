@@ -10,11 +10,14 @@ import streamlit as st
 # Defining dataset to a variable by reading the uploaded CSV file.
 df = pd.read_csv("cleaned_laptop_price_dataset.csv")
 
-# Creation And Training Models
-x = df.drop(columns =["Price", "Inches", "Weight"], axis=1 ) 
-y = df["Price"] # target variable
+# Drop the index column that's causing the issue
+df = df.drop(columns=["Unnamed: 0"], errors="ignore")
 
-x_train, x_test, y_train, y_test = split(x, y, test_size= 0.15, random_state=8)
+# Creation And Training Models
+x = df.drop(columns=["Price", "Inches", "Weight"], axis=1) 
+y = df["Price"]  # target variable
+
+x_train, x_test, y_train, y_test = split(x, y, test_size=0.15, random_state=8)
 
 # Identify categorical & numeric columns
 categorical_columns = x.select_dtypes(include=['object']).columns
@@ -90,10 +93,6 @@ Operating_System = st.selectbox("Operating System", get_unique_sorted("Operating
 if st.button("Predict Price"):
     # Create the user input with all required columns in the correct order
     user_input = [Company, Product, TypeName, ScreenResolution, Cpu, Ram, Memory, Gpu, Operating_System]
-    
-    # Debug: Show what columns we're expecting vs what we're providing
-    st.write(f"Expected columns: {list(x.columns)}")
-    st.write(f"Provided values: {user_input}")
     
     # Get the price using the updated function
     predicted_price = get_price(user_input)
