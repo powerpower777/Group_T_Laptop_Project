@@ -65,7 +65,7 @@ def get_price(user_input):
 
 
 st.title("Group T Laptop Price Project")
-st.write("Choose the laptop features to know the price")
+st.write("Select the laptop features to calculate the price")
 
 # Creation of selection box to get user input
 
