@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import streamlit as st
 
 # Defining dataset to a variable
-df = pd.read_csv("cleaned_laptop_price_dataset.csv")
+df = pd.read_csv("cleaned_dataset.csv")
 
 # FIX: Drop any unnamed columns and strip whitespace from column names
 df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
